@@ -1,0 +1,90 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Products in INR</title>
+
+    <style>
+        table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+    </style>
+
+    <script>
+        const URL = "https://dummyjson.com/products";
+        const API_KEY = "d655eecf0d3a0a7a9d35c1e0";
+
+        async function LoadProduct() {
+            try {
+                const res = await fetch(URL);
+                const data = await res.json();
+                const currencyRes = await fetch(
+                    `https://v6.exchangerate-api.com/v6/${API_KEY}/latest/USD`
+                );
+                const currencyData = await currencyRes.json();
+                const rate = currencyData.conversion_rates.INR;
+                let rows = "";
+                data.products.map((i, index) => {
+                    let inrPrice = i.price * rate;
+                    rows += `
+                        <tr>
+                            <td>${index + 1}</td>
+                            <td>${i.title}</td>
+                            <td>${i.category}</td>
+                            <td>₹${inrPrice.toFixed(2)}</td>
+                            <td>${i.rating}</td>
+                            <td>${i.stock}</td>
+                            <td><button onclick="addToCart(${i.id})">Add to Cart</button></td>
+
+                        </tr>
+                    `;
+                });
+
+                document.getElementById("product-list").innerHTML = rows;
+
+            } catch (error) {
+                console.log("Error:", error);
+            }
+        }
+
+        LoadProduct();
+    </script>
+</head>
+
+<body>
+
+    <h1 style="text-align: center;">List of Products</h1>
+
+    <table>
+        <thead>
+            <tr>
+                <th>S.NO</th>
+                <th>Title</th>
+                <th>Category</th>
+                <th>Price (INR)</th>
+                <th>Rating</th>
+                <th>Stock</th>
+                <th>add to cart</th>
+                <label type="checkbox" for="add to cart"></label>
+            </tr>
+        </thead>
+
+        <tbody id="product-list"></tbody>
+    </table>
+    <button onclick="LoadProduct()">Add to cart</button>
+    <button onclick="LoadProduct()">Go to Cart</button>
+
+
+</body>
+</html>
